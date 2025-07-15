@@ -34,27 +34,28 @@ def webhook():
             return str(challenge)
         return "Verification token mismatch", 403
 
-    data = request.get_json()
-    print("Received message:", data)
-    
-    if 'message' in data:
-        user_message = data['message'].get('text', '').lower()
+    elif request.method == 'POST':
+        data = request.get_json()
+        print("Received message:", data)
         
-        if any(word in user_message for word in ['hi', 'hello', 'salam', 'assalam']):
-            reply = greeting_message()
-        
-        elif 'watch' in user_message or 'watches' in user_message:
-            reply = list_watches()
-        
-        elif 'price' in user_message or 'qeemat' in user_message:
-            reply = get_watch_price(user_message)
-        
-        else:
-            reply = "Sorry, mai samajh nahi saka. Apko watches list chahiye, price ya koi or madad?"
-        
-        return jsonify({'reply': reply})
+        if 'message' in data:
+            user_message = data['message'].get('text', '').lower()
+            
+            if any(word in user_message for word in ['hi', 'hello', 'salam', 'assalam']):
+                reply = greeting_message()
+            
+            elif 'watch' in user_message or 'watches' in user_message:
+                reply = list_watches()
+            
+            elif 'price' in user_message or 'qeemat' in user_message:
+                reply = get_watch_price(user_message)
+            
+            else:
+                reply = "Sorry, mai samajh nahi saka. Apko watches list chahiye, price ya koi or madad?"
+            
+            return jsonify({'reply': reply})
 
-    return "No message found", 400
+        return "No message found", 400
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
