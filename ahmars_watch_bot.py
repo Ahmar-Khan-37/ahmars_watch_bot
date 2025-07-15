@@ -1,12 +1,8 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
+
+VERIFY_TOKEN = "ahmarverifytoken"
 
 # Dummy Watch List (Update later)
 watch_catalog = {
@@ -16,24 +12,28 @@ watch_catalog = {
     "Tissot Classic": "PKR 150,000"
 }
 
-# Greeting message
 def greeting_message():
     return "Hello! خوش آمدید to Ahmar's Watches. Aapko kia chahiye? Watches, Prices ya Details?"
 
-# List all watches
 def list_watches():
     watches = "\n".join(watch_catalog.keys())
     return f"Available Watches:\n{watches}"
 
-# Get price of a specific watch
 def get_watch_price(user_message):
     for watch in watch_catalog:
         if watch.lower() in user_message.lower():
             return f"{watch} ki price hai: {watch_catalog[watch]}"
     return "Kis watch ki price chahiye? Please name batain."
 
-@app.route('/webhook', methods=['POST'])
+@app.route('/webhook', methods=['GET', 'POST'])
 def webhook():
+    if request.method == 'GET':
+        token = request.args.get("hub.verify_token")
+        challenge = request.args.get("hub.challenge")
+        if token == VERIFY_TOKEN:
+            return str(challenge)
+        return "Verification token mismatch", 403
+
     data = request.get_json()
     print("Received message:", data)
     
@@ -58,4 +58,3 @@ def webhook():
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
-
